@@ -1,65 +1,102 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { Line } from "react-chartjs-2";
+import React from "react";
 
-export default function Home() {
+import useSWR from "swr";
+
+function Home() {
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    <>
+      <h1>Moment link:</h1>
+      <input></input>
+      <button>Go!</button>
+      <Graph></Graph>
+    </>
+  );
 }
+
+function Graph() {
+  var { data, error } = useSWR("/api/moment", (url) =>
+    fetch(url).then((r) => r.json())
+  );
+  if (error) return "error";
+  if (!data) {
+    return "Loading";
+  }
+  if (data) {
+    console.log(data);
+    return <Line data={data.data} options={{ spanGaps: true }} />;
+  }
+}
+
+// export async function getServerSideProps() {
+//   var URL =
+//     "https://www.nbatopshot.com/listings/p2p/208ae30a-a4fe-42d4-9e51-e6fd1ad2a7a9+2deb04a3-0f57-4a37-a810-92959b76ce4a/";
+//   const browser = await puppeteer.launch({ headless: true });
+//   const page = await browser.newPage();
+//   await page.setViewport({ width: 1280, height: 800 });
+//   await page.goto(URL);
+
+//   const data = await page.waitForSelector("#moment-detailed-serialNumber");
+
+//   const heading1 = await page.$eval("#moment-detailed-serialNumber", (el) => {
+//     return el.textContent;
+//   });
+
+//   var list = new Multimap();
+//   heading1.split("#").forEach((val) => {
+//     var serial = val.split("-")[0].trim();
+//     var price = val.split("-")[1].replace("$", "").replace(",", "").trim();
+//     if (price != "") {
+//       list.set(parseInt(price), serial);
+//     }
+//   });
+
+//   list.delete("");
+
+//   var keys = Array.from(list.keys());
+//   keys = keys.sort((a, b) => a - b);
+
+//   var chartDataList = [];
+
+//   list.forEachEntry((val, price) => {
+//     var min = Math.min(...val);
+//     chartDataList.push({ x: price, y: min });
+//   });
+
+//   chartDataList.sort((a, b) => a.x - b.x);
+
+//   var lowestSerial = chartDataList[0].y;
+//   var finalList = [];
+//   chartDataList.forEach((val) => {
+//     if (val.y < lowestSerial) {
+//       finalList.push(val);
+//       lowestSerial = val.y;
+//     }
+//   });
+
+//   var configuration = {
+//     type: "line",
+//     data: {
+//       datasets: [
+//         {
+//           label: "Moment prices",
+//           data: finalList,
+//         },
+//       ],
+//     },
+//     options: {
+//       scales: {
+//         xAxes: [
+//           {
+//             type: "linear",
+//             position: "bottom",
+//           },
+//         ],
+//       },
+//     },
+//   };
+
+//   return { props: { configuration } };
+// }
+
+export default Home;
